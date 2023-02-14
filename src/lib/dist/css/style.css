@@ -424,8 +424,8 @@ Preview page
 		max-width: 100%;
 	} */
 	.side-text {
-		min-width: 18rem;
-		max-width: 27rem;
+		/* min-width: 18rem;
+		max-width: 27rem; */
 		position: sticky;
 		max-height: 100vh;
 		z-index: 1;
