@@ -551,6 +551,7 @@ Preview page
 	border-radius: 5px;
 	border: 1px solid rgb(15, 28, 46);
 	overflow-x: auto;
+	white-space: pre-wrap;
 	padding-left: 10px;
 }
 .full-text pre span {
