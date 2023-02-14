@@ -34,6 +34,7 @@ export const getCaretPosition = (ctrl: HTMLTextAreaElement) =>
 		  };
 
 /**
+ * Parses markdown to HTML using `marked` and `sanitizes` the HTML using `DOMPurify`.
  * @file $lib/utils/editor/editor.utils.ts
  * @param { string } text - The markdown text to be parsed
  * @returns {string} The parsed markdown

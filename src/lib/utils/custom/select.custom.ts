@@ -22,6 +22,7 @@ const createTag = (tagName: string): HTMLDivElement => {
 /**
  * Removes duplicate tags from the tags container
  * @file $lib/utils/select.custom.ts
+ * @param { HTMLDivElement } tagContainer - The div container that houses the tag.
  */
 const reset = (tagContainer: HTMLDivElement): void => {
 	tagContainer.querySelectorAll('.tag').forEach((tag) => {
@@ -142,6 +143,7 @@ export const customSelect = (
 	// A reference tracking the number of tags left
 	let numOfTagsRemaining = 0;
 
+	// In case tags array isn't empty, particularly during preview of the post and update of articles, the tags are prepopulated in the UI.
 	if (tags.length >= 1) {
 		performAddingRags(tags, tagContainer, numOfTagsRemaining, serverTagsArrayOfNames, input);
 	}
@@ -171,13 +173,13 @@ export const customSelect = (
 			serverTagsArrayOfNames
 		);
 
-		// Get the value of the input element and remove trailing or leading comma (,)
+		// Get the value of the input element and remove trailing or leading comma (,) since comma (,) adds a tag to the tag array and container
 		const inputValue = inputElement.value
 			.trim()
 			.toLowerCase()
 			.replace(/(^,)|(,$)/g, '');
 
-		// When user presses the `Enter` key
+		// When user presses the `Enter` key or comman (,)
 		if ((event as KeyboardEvent).key === 'Enter' || (event as KeyboardEvent).key === ',') {
 			//  Check to ensure that the selected tag is available and has not been chosen before.
 			if (serverTagsArrayOfNames.includes(inputValue) && !tags.includes(inputValue)) {
@@ -200,6 +202,7 @@ export const customSelect = (
 			}
 		}
 
+		// Ensure that suggestion doesn't show up when input is empty
 		if (input.value === '') {
 			suggestionsPannel.innerHTML = '';
 		}
@@ -208,6 +211,8 @@ export const customSelect = (
 	// Listen to all clicks on the page's element and remove the selected tag.
 	document.addEventListener('click', (event) => {
 		const d = event.target as HTMLElement;
+		// If the clicked element is an `i` tag with `fa-close` class, remove the tag from the UI and tags array and restore it to the array of tags from the server.
+		// `<i class="fa-solid fa-close"></i>` is the fontawesome icon to remove a tag from the tag container and tags array.
 		if (d.tagName === 'I' && d.classList.contains('fa-close')) {
 			const tagName = d.previousElementSibling?.textContent?.trim().toLowerCase() as string;
 			const index = tags.indexOf(tagName);

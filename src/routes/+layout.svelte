@@ -6,11 +6,12 @@
 	import { afterUpdate } from 'svelte';
 	import { fly } from 'svelte/transition';
 
+	let noficationElement: HTMLParagraphElement;
+
 	afterUpdate(async () => {
-		const notifyEl = document.getElementById('notification');
-		if (notifyEl && $notification.message !== '') {
+		if (noficationElement && $notification.message !== '') {
 			setTimeout(() => {
-				notifyEl.classList.add('disappear');
+				noficationElement.classList.add('disappear');
 				$notification = { message: '', backgroundColor: '' };
 			}, 5000);
 		}
@@ -20,7 +21,7 @@
 {#if $notification.message && $notification.backgroundColor}
 	<p
 		class="notification"
-		id="notification"
+		bind:this={noficationElement}
 		style="background: {$notification.backgroundColor}"
 		in:fly={{ x: 200, duration: 500, delay: 500 }}
 		out:fly={{ x: 200, duration: 500 }}

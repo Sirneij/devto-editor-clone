@@ -2,7 +2,7 @@
 	import { showPreview } from '$lib/stores/editor.store';
 	import { notification } from '$lib/stores/notification.store';
 	import type { EditorContent } from '$lib/types/article.interface';
-	import { redColor, sadEmoji } from '$lib/utils/contants';
+	import { greenColor, happyEmoji, redColor, sadEmoji } from '$lib/utils/contants';
 	import {
 		getCaretPosition,
 		parseMarkdown,
@@ -112,6 +112,10 @@
 		markup = parseMarkdown(bodyEditor.content);
 		if (markup.length >= 20) {
 			$showPreview = !$showPreview;
+			$notification = {
+				message: `See, below, your previewed content ${happyEmoji}...`,
+				backgroundColor: `${greenColor}`
+			};
 		} else {
 			(event.target as HTMLElement).title =
 				'To preview, ensure your content is at least 19 characters.';
