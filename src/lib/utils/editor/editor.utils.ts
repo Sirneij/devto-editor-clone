@@ -2,39 +2,36 @@ import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 
-export const setCaretPosition = (
-    ctrl: HTMLTextAreaElement | EventTarget,
-    textLength: number
-) => {
-    const targetElement = ctrl as HTMLTextAreaElement;
-    if (targetElement.setSelectionRange) {
-        targetElement.focus();
-        let textAreaEnd = targetElement.selectionEnd;
-        if (!textAreaEnd) {
-            textAreaEnd = targetElement.selectionStart;
-        }
-        const selectionPosition = textAreaEnd + textLength / 2;
-        targetElement.setSelectionRange(selectionPosition, selectionPosition);
-        // IE8 and below
-    } else {
-        const range = document.createRange();
-        range.collapse(true);
-        range.setStart(targetElement, targetElement.selectionStart);
-        range.setEnd(targetElement, targetElement.selectionEnd);
-        range.selectNode(targetElement);
-    }
+/**
+ * Set the cursor position of input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } ctrl - The input or textarea element
+ * @param {number} startPos - The start of the cursor position
+ * @param {number} endPos - The end of the cursor position
+ */
+const setCaretPosition = (ctrl: HTMLTextAreaElement, startPos: number, endPos: number) => {
+	if (ctrl.setSelectionRange) {
+		ctrl.focus();
+		ctrl.setSelectionRange(startPos, endPos);
+	}
 };
 
-export const getCaretPosition = (ctrl: HTMLTextAreaElement) =>
-    ctrl.selectionStart ?
-    {
-        start: ctrl.selectionStart,
-        end: ctrl.selectionEnd
-    } :
-    {
-        start: 0,
-        end: 0
-    };
+/**
+ * Get the cursor position of input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } ctrl - The input or textarea element
+ * @returns {Record<string, number>} The start and end position of the cursor in the input or textarea element
+ */
+export const getCaretPosition = (ctrl: HTMLTextAreaElement): Record<string, number> =>
+	ctrl.selectionStart
+		? {
+				start: ctrl.selectionStart,
+				end: ctrl.selectionEnd
+		  }
+		: {
+				start: 0,
+				end: 0
+		  };
 
 /**
  * Parses markdown to HTML using `marked` and `sanitizes` the HTML using `DOMPurify`.
@@ -43,20 +40,264 @@ export const getCaretPosition = (ctrl: HTMLTextAreaElement) =>
  * @returns {string} The parsed markdown
  */
 export const parseMarkdown = (text: string): string => {
-    marked.setOptions({
-        renderer: new marked.Renderer(),
-        highlight: function(code, lang) {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
-        },
-        langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
-        pedantic: false,
-        gfm: true,
-        breaks: false,
-        sanitize: false,
-        smartypants: false,
-        xhtml: false
-    });
+	marked.setOptions({
+		renderer: new marked.Renderer(),
+		highlight: function (code, lang) {
+			const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+			return hljs.highlight(code, { language }).value;
+		},
+		langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+		pedantic: false,
+		gfm: true,
+		breaks: false,
+		sanitize: false,
+		smartypants: false,
+		xhtml: false
+	});
 
-    return DOMPurify.sanitize(marked.parse(text));
+	return DOMPurify.sanitize(marked.parse(text));
+};
+
+/**
+ * Insert text into input or textarea element at a specified position.
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ * @param { string } text - The text to be inserted
+ * @param { number } posStart - The start position where cursor should be placed
+ * @param { number } posEnd - The end position where cursor should be placed
+ */
+const updateTexareaValue = (
+	contentTextArea: HTMLTextAreaElement,
+	text: string,
+	posStart: number,
+	posEnd = 0
+) => {
+	if (contentTextArea) {
+		const start = contentTextArea.selectionStart + posStart;
+		let end = start + posEnd;
+		if (posEnd === 0) {
+			end = contentTextArea.selectionStart + posStart;
+		}
+		contentTextArea.value = `${contentTextArea.value.slice(
+			0,
+			contentTextArea.selectionStart
+		)}${text}${contentTextArea.value.slice(contentTextArea.selectionStart)}`;
+		// console.log(`Test: ${text}, Start: ${start}, End: ${end}`);
+		setCaretPosition(contentTextArea, start, end);
+	}
+};
+/**
+ *  Enable the usage of keyboard combinations to insert text into input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { Event } event - Event object
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const useKeyCombinations = (event: Event, contentTextArea: HTMLTextAreaElement) => {
+	const keysPressed: Record<string, boolean> = {};
+	event.target?.addEventListener('keydown', (e) => {
+		const keyEvent = e as KeyboardEvent;
+		keysPressed[keyEvent.key] = true;
+
+		if (
+			(keysPressed['Control'] || keysPressed['Meta'] || keysPressed['Shift']) &&
+			keyEvent.key == 'b'
+		) {
+			updateTexareaValue(contentTextArea, `****`, `****`.length / 2);
+		} else if (
+			(keysPressed['Control'] || keysPressed['Meta'] || keysPressed['Shift']) &&
+			keyEvent.key == 'i'
+		) {
+			updateTexareaValue(contentTextArea, `**`, `**`.length / 2);
+		} else if (
+			(keysPressed['Control'] || keysPressed['Meta'] || keysPressed['Shift']) &&
+			keyEvent.key === 'k'
+		) {
+			updateTexareaValue(contentTextArea, `[text](link)`, 1, `text`.length);
+		}
+	});
+
+	event.target?.addEventListener('keyup', (e) => {
+		delete keysPressed[(e as KeyboardEvent).key];
+	});
+};
+
+/**
+ * Add markdown bold command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addBoldCommand = (contentTextArea: HTMLTextAreaElement) => {
+	const text = `****`;
+	updateTexareaValue(contentTextArea, text, text.length / 2);
+};
+/**
+ * Add markdown italics command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addItalicCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(contentTextArea, `**`, `**`.length / 2);
+};
+/**
+ * Add markdown link command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addLinkCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(contentTextArea, `[text](link)`, 1, `text`.length);
+};
+/**
+ * Add markdown unordered list command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addUnorderedListCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		`\n- First item\n- Second item\n`,
+		`\n- `.length,
+		`First item`.length
+	);
+};
+/**
+ * Add markdown ordered list command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addOrderedListCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		`\n1. First item\n2. Second item\n`,
+		`\n1. `.length,
+		`First item`.length
+	);
+};
+/**
+ * Add markdown heading two command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addHeadingTwoCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		`\n## Your heading two \n\n`,
+		`\n## `.length,
+		`Your heading two `.length
+	);
+};
+/**
+ * Add markdown heading three command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addHeadingThreeCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		`\n### Your heading three \n\n`,
+		`\n### `.length,
+		`Your heading three `.length
+	);
+};
+
+/**
+ * Add markdown heading four command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addHeadingFourCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		`\n#### Your heading four \n\n`,
+		`\n#### `.length,
+		`Your heading four `.length
+	);
+};
+/**
+ * Add markdown heading five command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addHeadingFiveCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		`\n##### Your heading five \n\n`,
+		`\n##### `.length,
+		`Your heading five `.length
+	);
+};
+
+/**
+ * Add markdown heading six command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addHeadingSixCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		`\n###### Your heading six \n\n`,
+		`\n###### `.length,
+		`Your heading six `.length
+	);
+};
+
+/**
+ * Add markdown image command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addImageCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(contentTextArea, `![alt text](url)`, `![`.length, `alt text`.length);
+};
+
+/**
+ * Add markdown codeblock command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addCodeBlockCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		'\n```language\n<code here>\n```',
+		'\n```language\n'.length,
+		`<code here>`.length
+	);
+};
+
+/**
+ * Add markdown notice command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addNoteCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		'\n<div class="admonition note">\n<span class="title"><b>Note:</b></span>\n<p></p>\n</div>',
+		'\n<div class="admonition note">\n<span class="title"><b>Note:</b>'.length
+	);
+};
+
+/**
+ * Add markdown tip command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addTipCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		'\n<div class="admonition tip">\n<span class="title"><b>Tip:</b></span>\n<p></p>\n</div>',
+		'\n<div class="admonition tip">\n<span class="title"><b>Tip:</b>'.length
+	);
+};
+
+/**
+ * Add markdown warning command to input or textarea element
+ * @file $lib/utils/editor/editor.utils.ts
+ * @param { HTMLTextAreaElement } contentTextArea - The input or textarea element
+ */
+export const addWarningCommand = (contentTextArea: HTMLTextAreaElement) => {
+	updateTexareaValue(
+		contentTextArea,
+		'\n<div class="admonition warning">\n<span class="title"><b>Warning:</b></span>\n<p></p>\n</div>',
+		'\n<div class="admonition warning">\n<span class="title"><b>Warning:</b>'.length
+	);
 };

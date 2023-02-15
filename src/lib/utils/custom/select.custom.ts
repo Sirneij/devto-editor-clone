@@ -144,7 +144,7 @@ export const customSelect = (
 	let numOfTagsRemaining = 0;
 
 	// In case tags array isn't empty, particularly during preview of the post 
-	// and update of articles, the tags are prepopulated in the UI.
+	// Pand update of articles, the tags are prepopulated in the UI.
 	if (tags.length >= 1) {
 		performAddingRags(tags, tagContainer, numOfTagsRemaining, serverTagsArrayOfNames, input);
 	}

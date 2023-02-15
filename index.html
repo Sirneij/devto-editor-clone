@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Testing</title>
+		<style>
+			body {
+				padding: 30px 100px;
+			}
+
+			textarea,
+			button {
+				padding: 10px 20px;
+			}
+			textarea {
+				outline: none;
+				width: 100%;
+			}
+			button {
+				display: block;
+			}
+			div {
+				display: flex;
+				gap: 3px;
+				margin-top: 3px;
+			}
+		</style>
+	</head>
+	<body>
+		<textarea id="textarea" cols="30" rows="10"></textarea>
+		<div>
+			<button type="button" id="add-bold">Add Bold</button>
+			<button type="button" id="add-italics">Add Italics</button>
+		</div>
+		<script>
+			// Credits: http://blog.vishalon.net/index.php/javascript-getting-and-setting-caret-position-in-textarea/
+			const setCaretPosition = (ctrl, startPos, endPos) => {
+				// Modern browsers
+				if (ctrl.setSelectionRange) {
+					ctrl.focus();
+					ctrl.setSelectionRange(startPos, endPos);
+
+					// IE8 and below
+				} else if (ctrl.createTextRange) {
+					const range = ctrl.createTextRange();
+					range.collapse(true);
+					range.moveEnd('character', pos);
+					range.moveStart('character', pos);
+					range.select();
+				}
+			};
+
+			// Set the cursor position of the "#test-input" element to the end when the page loads
+			const textarea = document.getElementById('textarea');
+			const addBold = document.getElementById('add-bold');
+			const addItalics = document.getElementById('add-italics');
+
+			// const updateTexareaValue = (text, textStart, strippedTextLength) => {
+			const updateTexareaValue = (text, pos) => {
+				// const start = textarea.selectionEnd + textStart;
+				// const end = start + strippedTextLength;
+				const start = textarea.selectionEnd + pos;
+				const end = textarea.selectionEnd + pos;
+				textarea.value = `${textarea.value.slice(
+					0,
+					textarea.selectionEnd
+				)}${text}${textarea.value.slice(textarea.selectionEnd)}`;
+				setCaretPosition(textarea, start, end);
+			};
+
+			addBold.addEventListener('click', () => {
+				// const text = `**strong text**`;
+				const text = `****`;
+				// const len = text.replace(/\*/gi, '').length;
+				// updateTexareaValue(text, 2, len);
+				updateTexareaValue(text, text.length / 2);
+			});
+			addItalics.addEventListener('click', () => {
+				// const text = `*emphasize text*`;
+				const text = `**`;
+				// const len = text.replace(/\*/gi, '').length;
+				// updateTexareaValue(text, 1, len);
+				updateTexareaValue(text, text.length / 2);
+			});
+		</script>
+	</body>
+</html>

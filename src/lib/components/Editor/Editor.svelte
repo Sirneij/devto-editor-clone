@@ -4,101 +4,29 @@
 	import type { EditorContent } from '$lib/types/article.interface';
 	import { greenColor, happyEmoji, redColor, sadEmoji } from '$lib/utils/contants';
 	import {
-		getCaretPosition,
+		addBoldCommand,
+		addCodeBlockCommand,
+		addHeadingFiveCommand,
+		addHeadingFourCommand,
+		addHeadingSixCommand,
+		addHeadingThreeCommand,
+		addHeadingTwoCommand,
+		addImageCommand,
+		addItalicCommand,
+		addLinkCommand,
+		addNoteCommand,
+		addOrderedListCommand,
+		addTipCommand,
+		addUnorderedListCommand,
+		addWarningCommand,
 		parseMarkdown,
-		setCaretPosition
+		useKeyCombinations
 	} from '$lib/utils/editor/editor.utils';
-	import { onMount } from 'svelte';
 
 	let contentTextArea: HTMLTextAreaElement;
 	export let contentValue: string;
 	export let markup: string;
 
-	let updateTexareaValue: any, useKeyCombinations: any;
-	onMount(() => {
-		updateTexareaValue = (text: string) => {
-			const { selectionEnd, selectionStart } = contentTextArea;
-			contentValue = `${contentValue.slice(0, selectionEnd)}${text}${contentValue.slice(
-				selectionEnd
-			)}`;
-			setCaretPosition(contentTextArea, text.length);
-		};
-
-		useKeyCombinations = (event: Event) => {
-			let keysPressed: Record<string, boolean> = {};
-			event.target?.addEventListener('keydown', (e) => {
-				const keyEvent = e as KeyboardEvent;
-				keysPressed[keyEvent.key] = true;
-
-				if (
-					(keysPressed['Control'] || keysPressed['Meta'] || keysPressed['Shift']) &&
-					keyEvent.key == 'b'
-				) {
-					updateTexareaValue(`****`);
-				} else if (
-					(keysPressed['Control'] || keysPressed['Meta'] || keysPressed['Shift']) &&
-					keyEvent.key == 'i'
-				) {
-					updateTexareaValue(`**`);
-				} else if (
-					(keysPressed['Control'] || keysPressed['Meta'] || keysPressed['Shift']) &&
-					keyEvent.key === 'k'
-				) {
-					updateTexareaValue(`[text](link)`);
-					setCaretPosition(contentTextArea, text.length);
-				}
-			});
-
-			event.target?.addEventListener('keyup', (e) => {
-				delete keysPressed[(e as KeyboardEvent).key];
-			});
-		};
-	});
-	const addBoldCommand = () => {
-		updateTexareaValue(`****`);
-	};
-	const addItalicCommand = () => {
-		updateTexareaValue(`**`);
-	};
-	const addLinkCommand = () => {
-		updateTexareaValue(`[text](link)`);
-	};
-	const addUnorderedListCommand = () => {
-		updateTexareaValue(`\n- First item\n- Second item\n`);
-	};
-	const addOrderedListCommand = () => {
-		updateTexareaValue(`\n1. First item\n2. Second item\n`);
-	};
-	const addHeadingOneCommand = () => {
-		updateTexareaValue(`\n# Your heading one {#id-name .class-name}\n\n`);
-	};
-	const addHeadingTwoCommand = () => {
-		updateTexareaValue(`\n## Your heading one {#id-name .class-name}\n\n`);
-	};
-	const addHeadingThreeCommand = () => {
-		updateTexareaValue(`\n### Your heading one {#id-name .class-name}\n\n`);
-	};
-	const addImageCommand = () => {
-		updateTexareaValue(`![alt text](url)`);
-	};
-	const addCodeBlockCommand = () => {
-		updateTexareaValue('\n```language\n<code here>\n```');
-	};
-	const addNoteCommand = () => {
-		updateTexareaValue(
-			'\n<div class="admonition note">\n<span class="title"><b>Note:</b> </span>\n<p></p>\n</div>'
-		);
-	};
-	const addTipCommand = () => {
-		updateTexareaValue(
-			'\n<div class="admonition tip">\n<span class="title"><b>Tip:</b> </span>\n<p></p>\n</div>'
-		);
-	};
-	const addWarningCommand = () => {
-		updateTexareaValue(
-			'\n<div class="admonition warning">\n<span class="title"><b>Warning:</b> </span>\n<p></p>\n</div>'
-		);
-	};
 	const handlePreview = async (event: Event) => {
 		const bodyEditor: EditorContent = {
 			content: contentValue
@@ -126,47 +54,99 @@
 <div class="editor-icons">
 	<div class="basic">
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p on:click={addBoldCommand} class="tooltip">
+		<p
+			on:click={() => {
+				addBoldCommand(contentTextArea);
+			}}
+			class="tooltip"
+		>
 			<i class="fa-solid fa-bold" />
 			<span class="tooltiptext">Bold command [Cmd/Ctrl(Shift) + B]</span>
 		</p>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addItalicCommand}>
+		<p
+			class="tooltip"
+			on:click={() => {
+				addItalicCommand(contentTextArea);
+			}}
+		>
 			<i class="fa-solid fa-italic" />
 			<span class="tooltiptext"> Italics command [Cmd/Ctrl(Shift) + I] </span>
 		</p>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addLinkCommand}>
+		<p
+			class="tooltip"
+			on:click={() => {
+				addLinkCommand(contentTextArea);
+			}}
+		>
 			<i class="fa-solid fa-link" />
 			<span class="tooltiptext">Add link command [Cmd/Ctrl(Shift) + K]</span>
 		</p>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addUnorderedListCommand}>
+		<p
+			class="tooltip"
+			on:click={() => {
+				addUnorderedListCommand(contentTextArea);
+			}}
+		>
 			<i class="fa-solid fa-list" />
 			<span class="tooltiptext">Add unordered list command</span>
 		</p>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addOrderedListCommand}>
+		<p
+			class="tooltip"
+			on:click={() => {
+				addOrderedListCommand(contentTextArea);
+			}}
+		>
 			<i class="fa-solid fa-list-ol" />
 			<span class="tooltiptext">Add ordered list command</span>
 		</p>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addHeadingOneCommand}>
-			<i class="fa-solid fa-h" /><sub>1</sub>
-			<span class="tooltiptext">Heading 1 command</span>
+		<p class="dropdown">
+			<i class="fa-solid fa-h dropbtn" />
+			<span class="dropdown-content">
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<small
+					on:click={() => {
+						addHeadingTwoCommand(contentTextArea);
+					}}><i class="fa-solid fa-h" /><sub>2</sub></small
+				>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<small
+					on:click={() => {
+						addHeadingThreeCommand(contentTextArea);
+					}}><i class="fa-solid fa-h" /><sub>3</sub></small
+				>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<small
+					on:click={() => {
+						addHeadingFourCommand(contentTextArea);
+					}}><i class="fa-solid fa-h" /><sub>4</sub></small
+				>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<small
+					on:click={() => {
+						addHeadingFiveCommand(contentTextArea);
+					}}><i class="fa-solid fa-h" /><sub>5</sub></small
+				>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<small
+					on:click={() => {
+						addHeadingSixCommand(contentTextArea);
+					}}><i class="fa-solid fa-h" /><sub>6</sub></small
+				>
+			</span>
 		</p>
+
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addHeadingTwoCommand}>
-			<i class="fa-solid fa-h" /><sub>2</sub>
-			<span class="tooltiptext">Heading 2 command</span>
-		</p>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addHeadingThreeCommand}>
-			<i class="fa-solid fa-h" /><sub>3</sub>
-			<span class="tooltiptext">Heading 3 command</span>
-		</p>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addImageCommand}>
+		<p
+			class="tooltip"
+			on:click={() => {
+				addImageCommand(contentTextArea);
+			}}
+		>
 			<i class="fa-solid fa-image" />
 			<span class="tooltiptext">Add image command</span>
 		</p>
@@ -176,21 +156,39 @@
 			<i class="fa-solid fa-ellipsis-vertical dropbtn" />
 			<span class="dropdown-content">
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<small on:click={addNoteCommand}>Add note</small>
+				<small
+					on:click={() => {
+						addNoteCommand(contentTextArea);
+					}}>Add note</small
+				>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<small on:click={addTipCommand}>Add tip</small>
+				<small
+					on:click={() => {
+						addTipCommand(contentTextArea);
+					}}>Add tip</small
+				>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<small on:click={addWarningCommand}>Add warning</small>
+				<small
+					on:click={() => {
+						addWarningCommand(contentTextArea);
+					}}>Add warning</small
+				>
 			</span>
 		</p>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<p class="tooltip" on:click={addCodeBlockCommand}>
+		<p
+			class="tooltip"
+			on:click={() => {
+				addCodeBlockCommand(contentTextArea);
+			}}
+		>
 			<i class="fa-solid fa-code" />
 			<span class="tooltiptext">Code block command</span>
 		</p>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<p class="tooltip" on:click={(e) => handlePreview(e)}>
 			<i class="fa-solid fa-eye" />
+			<span class="tooltiptext">Preview content</span>
 		</p>
 	</div>
 </div>
@@ -200,7 +198,7 @@
 	bind:value={contentValue}
 	on:focus={(event) => {
 		if (event.target) {
-			useKeyCombinations(event);
+			useKeyCombinations(event, contentTextArea);
 		}
 	}}
 	name="content"
