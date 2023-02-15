@@ -143,7 +143,8 @@ export const customSelect = (
 	// A reference tracking the number of tags left
 	let numOfTagsRemaining = 0;
 
-	// In case tags array isn't empty, particularly during preview of the post and update of articles, the tags are prepopulated in the UI.
+	// In case tags array isn't empty, particularly during preview of the post 
+	// and update of articles, the tags are prepopulated in the UI.
 	if (tags.length >= 1) {
 		performAddingRags(tags, tagContainer, numOfTagsRemaining, serverTagsArrayOfNames, input);
 	}
@@ -173,7 +174,8 @@ export const customSelect = (
 			serverTagsArrayOfNames
 		);
 
-		// Get the value of the input element and remove trailing or leading comma (,) since comma (,) adds a tag to the tag array and container
+		// Get the value of the input element and remove trailing or leading comma (,) 
+		// since comma (,) adds a tag to the tag array and container
 		const inputValue = inputElement.value
 			.trim()
 			.toLowerCase()
@@ -194,6 +196,7 @@ export const customSelect = (
 				);
 			} else {
 				// If the chosen tag isn't available, alert the user
+				suggestionsPannel.innerHTML = '';
 				const span = document.createElement('span');
 				span.classList.add('error');
 				span.style.fontSize = '13px';
@@ -211,8 +214,10 @@ export const customSelect = (
 	// Listen to all clicks on the page's element and remove the selected tag.
 	document.addEventListener('click', (event) => {
 		const d = event.target as HTMLElement;
-		// If the clicked element is an `i` tag with `fa-close` class, remove the tag from the UI and tags array and restore it to the array of tags from the server.
-		// `<i class="fa-solid fa-close"></i>` is the fontawesome icon to remove a tag from the tag container and tags array.
+		// If the clicked element is an `i` tag with `fa-close` class, remove the tag from 
+		// the UI and tags array and restore it to the array of tags from the server.
+		// `<i class="fa-solid fa-close"></i>` is the fontawesome icon to remove a tag from 
+		// the tag container and tags array.
 		if (d.tagName === 'I' && d.classList.contains('fa-close')) {
 			const tagName = d.previousElementSibling?.textContent?.trim().toLowerCase() as string;
 			const index = tags.indexOf(tagName);
