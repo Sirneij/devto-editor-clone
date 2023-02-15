@@ -3,35 +3,38 @@ import { marked } from 'marked';
 import hljs from 'highlight.js';
 
 export const setCaretPosition = (
-	ctrl: HTMLTextAreaElement | EventTarget,
-	start: number,
-	end: number
+    ctrl: HTMLTextAreaElement | EventTarget,
+    textLength: number
 ) => {
-	const targetElement = ctrl as HTMLTextAreaElement;
-	// Modern browsers
-	if (targetElement.setSelectionRange) {
-		targetElement.setSelectionRange(start, end);
-
-		// IE8 and below
-	} else {
-		const range = document.createRange();
-		range.collapse(true);
-		range.setStart(targetElement, targetElement.selectionStart);
-		range.setEnd(targetElement, targetElement.selectionEnd);
-		range.selectNode(targetElement);
-	}
+    const targetElement = ctrl as HTMLTextAreaElement;
+    if (targetElement.setSelectionRange) {
+        targetElement.focus();
+        let textAreaEnd = targetElement.selectionEnd;
+        if (!textAreaEnd) {
+            textAreaEnd = targetElement.selectionStart;
+        }
+        const selectionPosition = textAreaEnd + textLength / 2;
+        targetElement.setSelectionRange(selectionPosition, selectionPosition);
+        // IE8 and below
+    } else {
+        const range = document.createRange();
+        range.collapse(true);
+        range.setStart(targetElement, targetElement.selectionStart);
+        range.setEnd(targetElement, targetElement.selectionEnd);
+        range.selectNode(targetElement);
+    }
 };
 
 export const getCaretPosition = (ctrl: HTMLTextAreaElement) =>
-	ctrl.selectionStart
-		? {
-				start: ctrl.selectionStart,
-				end: ctrl.selectionEnd
-		  }
-		: {
-				start: 0,
-				end: 0
-		  };
+    ctrl.selectionStart ?
+    {
+        start: ctrl.selectionStart,
+        end: ctrl.selectionEnd
+    } :
+    {
+        start: 0,
+        end: 0
+    };
 
 /**
  * Parses markdown to HTML using `marked` and `sanitizes` the HTML using `DOMPurify`.
@@ -40,20 +43,20 @@ export const getCaretPosition = (ctrl: HTMLTextAreaElement) =>
  * @returns {string} The parsed markdown
  */
 export const parseMarkdown = (text: string): string => {
-	marked.setOptions({
-		renderer: new marked.Renderer(),
-		highlight: function (code, lang) {
-			const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-			return hljs.highlight(code, { language }).value;
-		},
-		langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
-		pedantic: false,
-		gfm: true,
-		breaks: false,
-		sanitize: false,
-		smartypants: false,
-		xhtml: false
-	});
+    marked.setOptions({
+        renderer: new marked.Renderer(),
+        highlight: function(code, lang) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
+        },
+        langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+        pedantic: false,
+        gfm: true,
+        breaks: false,
+        sanitize: false,
+        smartypants: false,
+        xhtml: false
+    });
 
-	return DOMPurify.sanitize(marked.parse(text));
+    return DOMPurify.sanitize(marked.parse(text));
 };

@@ -21,8 +21,7 @@
 			contentValue = `${contentValue.slice(0, selectionEnd)}${text}${contentValue.slice(
 				selectionEnd
 			)}`;
-			contentTextArea.focus({ preventScroll: false });
-			setCaretPosition(contentTextArea, selectionStart, selectionStart + text.length / 2);
+			setCaretPosition(contentTextArea, text.length);
 		};
 
 		useKeyCombinations = (event: Event) => {
@@ -46,11 +45,7 @@
 					keyEvent.key === 'k'
 				) {
 					updateTexareaValue(`[text](link)`);
-					setCaretPosition(
-						contentTextArea,
-						getCaretPosition(contentTextArea).start,
-						getCaretPosition(contentTextArea).start + `[text](link)`.length / 2
-					);
+					setCaretPosition(contentTextArea, text.length);
 				}
 			});
 
