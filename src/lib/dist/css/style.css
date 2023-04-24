@@ -615,6 +615,44 @@ Preview page
 	border-bottom: 0.1rem solid rgba(255, 145, 0, 0.1);
 	display: flex;
 }
+.full-text table {
+	border-collapse: collapse;
+	margin: 2rem auto;
+	font-size: var(--fontSize-6);
+	max-width: 95%;
+	border-radius: 5px 5px 0 0;
+	overflow: hidden;
+	box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.75);
+	-webkit-box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.75);
+	-moz-box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.75);
+}
+
+.full-text table thead tr {
+	background: var(--gradient-2);
+	font-weight: bold;
+}
+
+.full-text table th,
+.full-text table td {
+	padding: 1.2rem 1.5rem;
+}
+
+.full-text table tbody tr {
+	border-bottom: 1px solid var(--text-carolina-blue);
+}
+
+.full-text table tbody tr:nth-of-type(even) {
+	background-color: var(--bg-oxford-blue);
+}
+
+.full-text table tbody tr:last-of-type {
+	border-bottom: 2px solid var(--gradient-1);
+}
+
+.full-text table tbody tr.active {
+	font-weight: bold;
+	color: var(--text-carolina-blue);
+}
 
 .card-wrapper {
 	display: flex;
