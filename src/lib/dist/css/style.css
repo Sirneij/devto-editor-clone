@@ -620,6 +620,7 @@ Preview page
 	margin: 2rem auto;
 	font-size: var(--fontSize-6);
 	max-width: 95%;
+	table-layout: fixed;
 	border-radius: 5px 5px 0 0;
 	overflow: hidden;
 	box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.75);
@@ -628,6 +629,7 @@ Preview page
 }
 
 .full-text table thead tr {
+	display: block;
 	background: var(--gradient-2);
 	font-weight: bold;
 }
@@ -635,6 +637,12 @@ Preview page
 .full-text table th,
 .full-text table td {
 	padding: 1.2rem 1.5rem;
+}
+.full-text table tbody {
+	display: block;
+	width: 100%;
+	overflow: auto;
+	height: 80vh;
 }
 
 .full-text table tbody tr {
